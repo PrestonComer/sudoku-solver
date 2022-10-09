@@ -1,122 +1,125 @@
 // Solving Sudoku Using CPP And Backtracking
-#include <bits/stdc++.h>
-using namespace std;
+// #include <bits/stdc++.h>
+#include <iostream>
+#include <string>
 
-// N is used for the size of Sudoku grid.
-// Size will be NxN
+// N Is The Size Of Sudoku Puzzle.
 #define N 9
 
-
-
-/* Searches the grid to find an entry that is
-still 0. If found, the reference
-parameters row, col will be set the location
-that is 0, and true is returned.
-If no 0 entries remain, false is returned. */
-bool Find0Location(int grid[N][N], int& row, int& col) {
-    for (row = 0; row < N; row++)
-        for (col = 0; col < N; col++)
-            if (grid[row][col] == 0)
+// Determines Where The First Blank Is In The Sudoku Puzzle
+// From Top Left To Bottom Right
+bool findBlankEntry(int puzzle[N][N], int& row, int& col) {
+    for (row = 0; row < N; row++) {
+        for (col = 0; col < N; col++) {
+            if (puzzle[row][col] == 0) {
                 return true;
-    return false;
-}
- 
-/* Returns a boolean which indicates whether
-an assigned entry in the specified row matches
-the given number. */
-bool UsedInRow(int grid[N][N], int row, int num)
-{
-    for (int col = 0; col < N; col++)
-        if (grid[row][col] == num)
-            return true;
-    return false;
-}
- 
-/* Returns a boolean which indicates whether
-an assigned entry in the specified column
-matches the given number. */
-bool UsedInCol(int grid[N][N], int col, int num)
-{
-    for (int row = 0; row < N; row++)
-        if (grid[row][col] == num)
-            return true;
-    return false;
-}
- 
-/* Returns a boolean which indicates whether
-an assigned entry within the specified 3x3 box
-matches the given number. */
-bool UsedInBox(int grid[N][N], int boxStartRow,
-               int boxStartCol, int num)
-{
-    for (int row = 0; row < 3; row++)
-        for (int col = 0; col < 3; col++)
-            if (grid[row + boxStartRow]
-                    [col + boxStartCol] ==
-                                       num)
-                return true;
-    return false;
-}
- 
-/* Returns a boolean which indicates whether
-it will be legal to assign num to the given
-row, col location. */
-bool isSafe(int grid[N][N], int row,
-            int col, int num)
-{
-    /* Check if 'num' is not already placed in
-    current row, current column
-    and current 3x3 box */
-    return !UsedInRow(grid, row, num)
-           && !UsedInCol(grid, col, num)
-           && !UsedInBox(grid, row - row % 3,
-                         col - col % 3, num)
-           && grid[row][col] == 0;
-}
- 
-/* A utility function to print grid */
-void printGrid(int grid[N][N])
-{
-    for (int row = 0; row < N; row++)
-    {
-        for (int col = 0; col < N; col++)
-            cout << grid[row][col] << " ";
-        cout << endl;
+            }
+        }
     }
+    return false;
 }
- 
 
+// Determine If The Guess Is Already In The Current Row
+bool inRow(int puzzle[N][N], int row, int guess) {
+    for (int col = 0; col < N; col++) {
+        if (puzzle[row][col] == guess) {
+            return true;
+        }
+    }
+    return false;
+}
 
+// Determine If The Guess Is Already In The Current Column
+bool inCol(int puzzle[N][N], int col, int guess) {
+    for (int row = 0; row < N; row++) {
+        if (puzzle[row][col] == guess) {
+            return true;
+        }
+    }
+    return false;
+}
 
+// Determine If The Guess Is Already In The Current Box
+bool inBox(int puzzle[N][N], int boxRow, int boxCol, int guess) {
+    for (int row = 0; row < 3; row++) {
+        for (int col = 0; col < 3; col++) {
+            if (puzzle[row + boxRow][col + boxCol] == guess) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
+// Determines If The Guess Is Valid
+bool isSafe(int puzzle[N][N], int row, int col, int guess) {
+    if (!inRow(puzzle, row, guess)) {
+        return true;
+    }
+    if (!inCol(puzzle, row, guess)) {
+        return true;
+    }
+    if (!inBox(puzzle, row - row % 3, col - col % 3, guess)) {
+        return true;
+    }
+    if (!puzzle[row][col] == 0) {
+        return true;
+    }
+    return false;
+}
 
-/* Takes a partially filled-in grid and attempts
-to assign values to all 0 locations in
-such a way to meet the requirements for
-Sudoku solution (non-duplication across rows,
-columns, and boxes) */
-bool SolveSudoku(int grid[N][N]) {
+// Display Sudoku Puzzle
+void displayPuzzle(int puzzle[N][N]) {
+    for (int row = 0; row < N; row++) {
+        if (row % 3 == 0) {
+            for (int count = 0; count < 25; count++) {
+                std::cout << "-";
+            }
+            std::cout << std::endl;
+        }
+
+        for (int col = 0; col < N; col++) {
+            if (col % 3 == 0) {
+                std::cout << "| ";
+            }
+
+            std::cout << puzzle[row][col];
+
+            if (col != (N - 1)) {
+                std::cout << " ";
+            }
+        }
+        std::cout << " |" << std::endl;
+    }
+    for (int count = 0; count < 25; count++) {
+        std::cout << "-";
+    }
+    std::cout << std::endl;
+}
+
+// Solve Given Partially Correct Sudoku Puzzle
+bool findSolution(int puzzle[N][N]) {
     int row, col;
 
     // Check If A Solution Has Been Found
-    if (!Find0Location(grid, row, col)) {
+    if (!findBlankEntry(puzzle, row, col)) {
         return true;
     }
 
-    // Guess Numbers Starting At 1 Increasing To 9
-    for (int num = 1; num <= 9; num++) {
+    // Make Guesses Starting At 1 Increasing To 9
+    for (int guess = 1; guess <= 9; guess++) {
         // Determine If Our Guess Is Valid
-        if (isSafe(grid, row, col, num)) {
+        if (isSafe(puzzle, row, col, guess)) {
             // Temporarily Input Our Safe Guess
-            grid[row][col] = num;
+            puzzle[row][col] = guess;
 
             // If All Spaces Are Filled Then We have The Solution
-            if (SolveSudoku(grid)) {
+            if (findSolution(puzzle)) {
                 return true;
             }
 
             // By This Point Then Our Guess Was Wrong
-            grid[row][col] = 0;
+            puzzle[row][col] = 0;
         }
     }
 
@@ -124,24 +127,59 @@ bool SolveSudoku(int grid[N][N]) {
 }
 
 int main() {
-    int grid[N][N] = {
-        {3,0,6,5,0,8,4,0,0},
-        {5,2,0,0,0,0,0,0,0},
-        {0,8,7,0,0,0,0,3,1},
-        {0,0,3,0,1,0,0,8,0},
-        {9,0,0,8,6,3,0,0,5},
-        {0,5,0,0,9,0,6,0,0},
-        {1,3,0,0,0,0,2,5,0},
-        {0,0,0,0,0,0,0,7,4},
-        {0,0,5,2,0,6,3,0,0}
+    int puzzle[N][N], rowNum = 0, pos, completePuzzleGiven = 1;
+    std::string token, userInput = "", x;
+
+    // Create a sudoku puzzle
+    std::cout << "Please Enter Your Puzzle By Row Without Spaces In The Format #########" << std::endl;
+
+    // get the puzzle row by row
+    for (int row = 0; row < N; row++) {
+        // get a row of the puzzle
+        std::cout << "Input Puzzle Row " << row+1 << ": "; std::cin >> x;
+
+        // the inputed row has to have N size
+        if (x.length() != N) {
+            std::cout << "Incorrect Input Size. Please Try Again" << std::endl;
+            row--;
+        } else {
+            userInput.append(x + " ");
+            std::cout << userInput << std::endl;
+        }
     };
 
-    if (SolveSudoku(grid) == true) {
-        printGrid(grid);
+    // take the one space deliminated string and put it in the NxN array
+    while ((pos = userInput.find(" ")) != std::string::npos) {
+        token = userInput.substr(0, pos);
+
+        for (int i = 0; i < token.length(); i++) {
+            puzzle[rowNum][i] = std::stoi(std::string(1, token[i]));
+            if (token[i] == '0') {
+                completePuzzleGiven = 0;
+            }
+        }
+        rowNum++;
+        userInput.erase(0, pos + 1);
     }
-    else {
-        cout << "No solution exists";
+
+    // display the given puzzle
+    std::cout << "Starting Puzzle:" << std::endl;
+    displayPuzzle(puzzle);
+    std::cout << std::endl;
+
+    // attempt to solve puzzle 
+    // either display the solution, that the given puzzle was already completed, or
+    // that there is no solution possible
+    if (findSolution(puzzle) == true) {
+        std::cout << "Puzzle Solution:" << std::endl;
+        displayPuzzle(puzzle);
+    } else if (completePuzzleGiven) {
+        std::cout << "Given Puzzle Has No Blank Spaces";
+    } else {
+        std::cout << "No Solution Exists";
     }
- 
+
+    // keep the program open for user to view
+    char pause; std::cin >> pause;
     return 0;
 }
