@@ -2,6 +2,7 @@
 // #include <bits/stdc++.h>
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 // N Is The Size Of Sudoku Puzzle.
 #define N 9
@@ -128,7 +129,7 @@ bool findSolution(int puzzle[N][N]) {
 
 int main() {
     int puzzle[N][N], rowNum = 0, pos, completePuzzleGiven = 1;
-    std::string token, userInput = "", x;
+    std::string token, userInput = "", x = "";
 
     // Create a sudoku puzzle
     std::cout << "Please Enter Your Puzzle By Row Without Spaces In The Format #########" << std::endl;
@@ -141,6 +142,9 @@ int main() {
         // the inputed row has to have N size
         if (x.length() != N) {
             std::cout << "Incorrect Input Size. Please Try Again" << std::endl;
+            row--;
+        } else if (!std::all_of(x.begin(), x.end(), ::isdigit)) {
+            std::cout << "Invalid Input. Please Enter Only Numbers" << std::endl;
             row--;
         } else {
             userInput.append(x + " ");
